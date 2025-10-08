@@ -1,0 +1,2 @@
+# Only stdlib used. For tests:
+pytest

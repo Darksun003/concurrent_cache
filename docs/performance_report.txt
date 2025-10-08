@@ -1,0 +1,50 @@
+Concurrency and Performance Analysis Report
+===========================================
+
+Testing Methodology:
+-------------------
+- Unit tests verify correctness of cache operations, eviction policy behavior, and edge cases.
+- Concurrency tests simulate multiple threads performing simultaneous get and put operations.
+- Threads execute a mix of cache hits and misses to stress synchronization and consistency.
+- Tests check for data races, consistency errors, and deadlocks.
+
+Performance Benchmarking:
+-------------------------
+- Benchmarks implemented using Python `time.perf_counter()` to measure elapsed time.
+- Workloads include:
+  - Read-heavy: majority of operations are cache hits.
+  - Write-heavy: frequent insertions and evictions.
+  - Mixed read/write workloads.
+- Benchmarks compare eviction policies: LRU vs. LFU.
+- Measured metrics:
+  - Throughput (operations per second)
+  - Average latency per operation (milliseconds)
+- Benchmarks executed with multiple threads to evaluate concurrency scalability.
+
+Results Summary:
+----------------
+- LRU policy generally outperforms LFU in throughput due to simpler data structures and lower overhead.
+- LFU provides better eviction quality in workloads with skewed access patterns but suffers from higher latency.
+- Throughput decreases as thread count increases, due to lock contention on the global cache lock.
+- Read-heavy workloads scale better than write-heavy due to fewer eviction events.
+- Concurrency tests show no data corruption or crashes, indicating correctness under load.
+
+Bottlenecks and Limitations:
+----------------------------
+- Global lock in ThreadSafeCache causes contention under high concurrency.
+- LFU eviction overhead can degrade performance in write-heavy scenarios.
+- Python’s Global Interpreter Lock (GIL) may limit true parallelism in CPU-bound parts.
+- Data structures can be optimized (e.g., using lock-free or segmented approaches) for better scalability.
+
+Recommendations and Future Work:
+--------------------------------
+- Implement finer-grained locking or lock striping to reduce contention.
+- Explore asynchronous or lock-free data structures.
+- Add additional eviction policies like FIFO or ARC.
+- Profile memory usage and optimize data structures for space efficiency.
+- Extend benchmarking to real-world workloads and longer durations.
+
+Conclusion:
+-----------
+The implemented cache provides a robust thread-safe design with pluggable eviction policies. Benchmarking reveals expected trade-offs between eviction quality and performance. The project offers a strong foundation for concurrent cache systems with clear directions for improvement.
+

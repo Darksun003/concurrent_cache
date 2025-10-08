@@ -1,0 +1,66 @@
+Design Document Summary
+=======================
+
+Project Overview:
+-----------------
+This project implements a concurrent, thread-safe in-memory cache with pluggable eviction policies. The cache supports generic key-value storage and allows multiple threads to perform get and put operations concurrently without data corruption. It supports runtime selection of eviction strategies, including Least Recently Used (LRU) and Least Frequently Used (LFU), and is designed for high performance and scalability.
+
+Architecture:
+-------------
+1. Core Cache (ThreadSafeCache):
+   - Uses a Python dictionary to store key-value pairs.
+   - Thread safety ensured via a single reentrant lock (`threading.RLock`) protecting cache operations.
+   - Provides `get(key)` and `put(key, value)` methods.
+   - Integrates with eviction policy to maintain capacity constraints.
+
+2. Eviction Policy Interface:
+   - Abstract base class `EvictionPolicy` defines the required interface:
+     - `key_accessed(key)`: Called on cache hits or updates.
+     - `key_added(key)`: Called on insertion of new keys.
+     - `key_removed(key)`: Called on key removal.
+     - `evict_key()`: Returns the key selected for eviction.
+
+3. Concrete Eviction Policies:
+   - LRU (Least Recently Used):
+     - Maintains a doubly linked list or ordered structure of keys by access time.
+     - On every access, moves the key to the "most recently used" position.
+     - Evicts the least recently used key.
+   
+   - LFU (Least Frequently Used):
+     - Maintains frequency counts for each key.
+     - On access, increments the key’s frequency.
+     - Evicts key with the lowest frequency.
+     - Uses a frequency-to-keys mapping to quickly identify eviction candidate.
+
+Synchronization and Concurrency:
+--------------------------------
+- Cache operations are synchronized with a `threading.RLock` to prevent race conditions.
+- Lock held only during minimal critical sections (dictionary access and eviction operations) to reduce contention.
+- Eviction policy updates are also synchronized within the same lock to maintain consistency.
+- This approach balances simplicity with thread safety and acceptable concurrency.
+
+Data Structures:
+----------------
+- Core cache storage: Python dict for O(1) get/put operations.
+- LRU:
+  - Doubly linked list or `collections.OrderedDict` to track usage order.
+- LFU:
+  - Dict to map keys to frequency counts.
+  - Another dict mapping frequency to sets of keys for efficient eviction.
+
+Pluggability:
+-------------
+- Eviction policies implement a common interface, allowing dynamic policy swapping.
+- `ThreadSafeCache` accepts an eviction policy instance during initialization.
+- Eviction policy methods are called appropriately on cache events.
+
+Design Trade-offs:
+------------------
+- Use of a single lock simplifies implementation but may limit scalability under extreme contention.
+- Alternative designs could use lock striping or finer-grained locks but increase complexity.
+- LFU is more complex and potentially slower due to frequency tracking but can improve eviction quality in certain workloads.
+
+Summary:
+--------
+The design achieves thread safety, modular eviction policies, and maintains acceptable performance for concurrent access. It provides a solid foundation for extensibility, testing, and benchmarking.
+
