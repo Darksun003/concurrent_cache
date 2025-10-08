@@ -1,4 +1,4 @@
-CONCURRENT THREAD-SAFE CACHE WITH PLUGGABLE EVICTION POLICIES
+***CONCURRENT THREAD-SAFE CACHE WITH PLUGGABLE EVICTION POLICIES***
 Overview
 This project implements a high-performance, thread-safe in-memory cache supporting concurrent read and write operations. It is designed to allow multiple threads to safely interact with the cache simultaneously without data corruption or performance degradation.
 
